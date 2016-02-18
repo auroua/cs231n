@@ -1,4 +1,5 @@
 import numpy as np
+import datautils
 
 
 def L_i(x, y, W):
@@ -49,8 +50,33 @@ def L(X, y, W):
   """
   # evaluate loss over all examples in X without using any for loops
   # left as exercise to reader in the assignment
-  total_loss = 0.0
+  delta = 1.0
   # W = np.zeros([category, X.shape[1]])
-  for i in range(X.shape[0]):
-      total_loss += L_i_vectorized(X[i], y[i], W)
+
+  scores = X.dot(W.T)
+  # print scores
+  ind = range(scores.shape[0])
+  y_list = y.tolist()
+  yi = scores[ind, y_list]
+  yi = yi[:, np.newaxis]
+  margin = np.maximum(0, scores - yi + delta)
+  loss_i = np.sum(margin, axis=1)
+  total_loss = np.sum(loss_i)
   return total_loss
+
+
+Xtr, Ytr, Xte, Yte = datautils.load_CIFAR10('/home/aurora/workspace/cifar/cifar-10-batches-py/') # a magic function we provide
+    # flatten out all images to be one-dimensional
+Xtr_rows = Xtr.reshape(Xtr.shape[0], 32 * 32 * 3) # Xtr_rows becomes 50000 x 3072
+Xtr_means = np.mean(Xtr_rows, axis=0)
+
+Xtr_rows -= Xtr_means
+Xtr_rows /= 127.0
+# print Xtr_rows
+Xte_rows = Xte.reshape(Xte.shape[0], 32 * 32 * 3) # Xte_rows becomes 10000 x 3072
+Xtr_totals = np.ones((Xtr_rows.shape[0], Xtr_rows.shape[1] + 1))
+Xtr_totals[:, :Xtr_totals.shape[1]-1] = Xtr_rows
+
+def CIFAR10_loss_fun(W):
+      # data pre_process
+    return L(Xtr_totals, Ytr, W)
