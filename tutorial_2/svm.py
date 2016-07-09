@@ -41,7 +41,7 @@ def L_i_vectorized(x, y, W):
   return loss_i
 
 
-def L(X, y, W):
+def L(X, y, W, lam=0.1):
   """
   fully-vectorized implementation :
   - X holds all the training examples as columns (e.g. 3073 x 50,000 in CIFAR-10)
@@ -61,11 +61,18 @@ def L(X, y, W):
   yi = yi[:, np.newaxis]
   margin = np.maximum(0, scores - yi + delta)
   loss_i = np.sum(margin, axis=1)
-  total_loss = np.sum(loss_i)
+  total_loss = np.sum(loss_i) + lam*regulariztion(W)
   return total_loss
 
 
-Xtr, Ytr, Xte, Yte = datautils.load_CIFAR10('/home/aurora/workspace/cifar/cifar-10-batches-py/') # a magic function we provide
+def regulariztion(W):
+  regular = W**2
+  result = np.sum(regular, axis=0)
+  result = np.sum(result, axis=0)
+  return result
+
+
+Xtr, Ytr, Xte, Yte = datautils.load_CIFAR10('/home/auroua/workspace/cifar-10-batches-py/') # a magic function we provide
     # flatten out all images to be one-dimensional
 Xtr_rows = Xtr.reshape(Xtr.shape[0], 32 * 32 * 3) # Xtr_rows becomes 50000 x 3072
 Xtr_means = np.mean(Xtr_rows, axis=0)
